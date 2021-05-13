@@ -1,0 +1,5 @@
+# THIS FILE IS CONTROLLED BY GIT.  DO NOT EDIT BY HAND OR YOUR CHANGES
+# WILL DISAPPEAR.
+#
+# Run the deploy every hour
+22 * * * * root /foresight/bin/cronmail -u -a foresight-se@fsautomation.com -- /usr/local/sbin/awscli-tools-run-deploy

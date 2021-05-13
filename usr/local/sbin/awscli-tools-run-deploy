@@ -1,0 +1,101 @@
+#!/usr/bin/perl
+# THIS FILE IS CONTROLLED BY GIT.  DO NOT EDIT BY HAND OR YOUR CHANGES
+# WILL DISAPPEAR.
+#
+# This script is in perl, because when perl scripts run, the entire file
+# is read into memory.  In bash, if this file gets updated during a pull,
+# then the shell "looses" it's place and is unpredictable.
+#
+use strict;
+use warnings;
+use IPC::Run qw/run timeout/;
+use Getopt::Long;
+use Sys::Syslog;
+use File::Basename;
+
+my $verbose = 0;
+my $prog = basename($0, ".pl");
+
+openlog($prog, 'nofatal,pid', 'user');
+
+sub usage {
+	my $xval = shift;
+	@_ and print "@_\n";
+	print "usage: $prog [-v]
+
+Remove any local changes, and pull the latest version of the git
+repo.
+
+Options:
+--------
+    -v:   verbose.  Print what is going on.
+    -h:   Print this help message.
+" ;
+	exit($xval);
+}
+
+GetOptions(
+	'verbose|v!' => \$verbose,
+	'help|h' => sub { usage(0); },
+	)
+	or usage(2,"Unknown argument.");
+
+# IPC::Run variables.
+my (@cmd,$in,$out,$err);
+my $msg;
+
+# Exit value.
+my $xval = 0;
+my $retval = 0;
+
+if ( ! chdir("/root/awscli-tools") ) {
+	die "cannot chdir(/root/awscli-tools";
+}
+
+sub run_cmd {
+	my $desc = shift;
+	@cmd = @_;
+	$verbose and print "Running '@cmd' ($desc) ...\n";
+	run \@cmd, \$in, \$out, \$err, timeout(10);
+	my $retval = $?;
+	if ( $retval != 0 ) {
+		print STDERR "ERROR: Cannot run '@cmd': $out, $err";
+		exit(1);
+	}
+	$verbose && length($out) and print $out,"\n";
+}
+
+# Clear out any changes
+run_cmd("save changes", qw/git stash/);
+run_cmd("remove changes", qw/git stash clear/);
+run_cmd("pull latest from github", qw/git pull/);
+my %changed_files = ();
+# Analyze the output
+{
+	# Updating ea3eb16..ec2305a
+	# Fast-forward
+	#  etc/postfix/sasl_passwd               | 1 +
+	#  usr/local/sbin/unimatrixv2-run-deploy | 1 +
+	#  2 files changed, 2 insertions(+)
+	my @lines = split(/\r?\n/s,$out);
+	chomp(@lines);
+
+	# The last line with text has our "status"
+	while ( @lines ) {
+		$msg = pop(@lines);
+		next if ( ! length($msg));
+		last;
+	}
+	if ( length($msg) ) {
+		syslog("info","git pull: $msg");
+
+	}
+
+	# For the remaining lines that have a count, add those to the
+	# changed files hashref.
+	foreach my $l ( @lines ) {
+		$l =~ m/^\s+(.*)\s+\|\s+\d+/ or next;
+		$changed_files{$1} = 1;
+	}
+}
+exit(0);
