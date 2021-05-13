@@ -3,15 +3,52 @@
 # THIS FILE IS CONTROLED BY A GIT REPO.  DO NOT EDIT BY HAND OR YOUR
 # CHANGES WILL GO AWAY
 #
-# Make symlinks to this file named:
-#    aws-instance-{prop} where prop is one of the properties.
-TARGET=$(basename $0 | sed -e 's/aws-instance-//')
+usage() {
+	xval=$1
+	shift
+	[[ $@ -gt 0 ]] && echo "$@"
+	echo "usage: $0 [target]
+
+Get the current instances identity.  If a target is supplied, print only
+that property.
+"
+	exit $xval
+}
+while getopts h c ; do
+	case "$c" in
+		h ) usage 0 ;;
+		* ) usage 2 "Unknown argument." ;;
+	esac
+done
+shift $(( OPTIND - 1 ))
+
 URL=http://169.254.169.254/latest/dynamic/instance-identity/document 
-case "$TARGET" in
-   "" | all ) 
-		curl -s $URL
-		;;
-	* )
-		curl -s $URL | jq -r .$TARGET
-		;;
-esac
+
+if [[ $# -eq 0 ]]; then
+	# Just print all of them
+	curl -s $URL
+	exit 0
+fi
+
+if [[ $# -eq 1 ]]; then
+	# Print the one
+	curl -s $URL | jq -r .$1
+	exit 0
+fi
+
+# Otherwise, we have multiples.  Gather them up and print
+# them on one line like uname.
+RESULTS=()
+TMPF=
+cleanup () {
+	/bin/rm -f $TMPF
+}
+trap cleanup 0
+TMPF=$(mktemp /tmp/XXXXXXXX)
+curl -s $URL > $TMPF
+
+while [[ $# -gt 0 ]]; do
+	RESULTS+=( $(jq -r .$1 $TMPF) )
+	shift
+done
+echo "${RESULTS[@]}"
