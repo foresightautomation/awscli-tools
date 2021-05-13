@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# THIS FILE IS CONTROLED BY A GIT REPO.  DO NOT EDIT BY HAND OR YOUR
+# CHANGES WILL GO AWAY
+#
+# Make symlinks to this file named:
+#    aws-instance-{prop} where prop is one of the properties.
+TARGET=$(basename $0 | sed -e 's/aws-instance-//')
+URL=http://169.254.169.254/latest/dynamic/instance-identity/document 
+case "$TARGET" in
+   "" | all ) 
+		curl -s $URL
+		;;
+	* )
+		curl -s $URL | jq -r .$TARGET
+		;;
+esac
