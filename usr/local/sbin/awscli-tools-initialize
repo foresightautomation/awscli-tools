@@ -1,0 +1,10 @@
+#!/bin/bash
+# THIS FILE IS CONTROLLED BY GIT.  DO NOT EDIT BY HAND OR YOUR CHANGES
+# WILL DISAPPEAR.
+#
+
+# Install yum repos
+amazon-linux-extras install -y epel
+
+# Install yum packages
+yum -y install perl-Sys-Syslog perl-IPC-Run jq
