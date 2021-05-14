@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# THIS FILE IS CONTROLLED BY GIT.  DO NOT EDIT BY HAND OR YOUR CHANGES
+# WILL DISAPPEAR.
+#
+# This script will create identity files in
+# /usr/local/etc/awscli-tools-identity.
+ETCDIR=/usr/local/etc/awscli-tools-identity
+[[ -d $ETCDIR ]] || mkdir -p $ETCDIR || exit 1
+
+TMPF=
+cleanup() {
+    /bin/rm -f $TMPF
+}
+trap cleanup 0
+
+TMPF=$(mktemp /tmp/XXXXXXXX)
+# Make sure the world can read these
+umask 022
+/usr/local/bin/awscli-instance-identity > $TMPF
+for i in accountId architecture availabilityZone billingProducts devpayProductCodes marketplaceProductCodes imageId instanceId instanceType kernelId pendingTime privateIp ramdiskId region version ; do
+	jq -r .$i $TMPF > $ETCDIR/$i
+done

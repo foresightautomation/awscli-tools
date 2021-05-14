@@ -98,4 +98,7 @@ my %changed_files = ();
 		$changed_files{$1} = 1;
 	}
 }
+
+# Make the identity files
+run_cmd("",'/usr/local/sbin/awscli-tools-make-identity-files');
 exit(0);
