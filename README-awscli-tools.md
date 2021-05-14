@@ -8,7 +8,7 @@ as root:
 ```bash
 git clone --no-checkout https://github.com/foresightautomation/awscli-tools.git
 cd awscli-tools
-git config core.worktree "../../"
+git config core.worktree /
 git reset --hard origin/master
 git pull
 ```
