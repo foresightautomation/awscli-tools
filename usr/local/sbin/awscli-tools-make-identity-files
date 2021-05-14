@@ -17,7 +17,7 @@ trap cleanup 0
 TMPF=$(mktemp /tmp/XXXXXXXX)
 # Make sure the world can read these
 umask 022
-/usr/local/bin/awscli-instance-identity > $TMPF
+/usr/local/bin/aws-instance-identity > $TMPF
 for i in accountId architecture availabilityZone billingProducts devpayProductCodes marketplaceProductCodes imageId instanceId instanceType kernelId pendingTime privateIp ramdiskId region version ; do
 	jq -r .$i $TMPF > $ETCDIR/$i
 done
