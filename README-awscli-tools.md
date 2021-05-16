@@ -12,4 +12,6 @@ cd awscli-tools
 git config core.worktree /
 git reset --hard origin/master
 git pull
+/usr/local/sbin/awscli-tools-initialize
+/usr/local/sbin/awscli-tools-run-deploy
 ```
