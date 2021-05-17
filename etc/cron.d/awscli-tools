@@ -5,4 +5,4 @@
 25 1 * * * root /foresight/bin/cronmail -u -a foresight-se@fsautomation.com -- /usr/local/sbin/awscli-tools-run-deploy
 
 # Update the identity files every hour
-44 * * * * root /foresight/bin/cronmail -u -a foresight-se@fsautomation.com -- /usr/local/sbin/awscli-tools-make-identity-files
+46 * * * * root /foresight/bin/cronmail -u -a foresight-se@fsautomation.com -- /usr/local/sbin/awscli-tools-make-identity-files
