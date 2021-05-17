@@ -28,14 +28,17 @@ repo.
 
 Options:
 --------
-    -v:   verbose.  Print what is going on.
-    -h:   Print this help message.
+    --verbose:   verbose.  Print what is going on.
+    --ami:       set this when updating the AMI.
+    --help:      Print this help message.
 " ;
 	exit($xval);
 }
 
+my $is_ami = 0;
 GetOptions(
 	'verbose|v!' => \$verbose,
+    'ami'        => \$is_ami,
 	'help|h' => sub { usage(0); },
 	)
 	or usage(2,"Unknown argument.");
@@ -100,5 +103,7 @@ my %changed_files = ();
 }
 
 # Make the identity files
-run_cmd("",'/usr/local/sbin/awscli-tools-make-identity-files');
+if ( ! $is_ami ) {
+	run_cmd("",'/usr/local/sbin/awscli-tools-make-identity-files');
+}
 exit(0);
