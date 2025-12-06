@@ -23,5 +23,5 @@ for i in accountId architecture availabilityZone billingProducts devpayProductCo
         # to avoid race conditions for readers of the file (where the file could be
         # empty).  The mv command is atomic, so the file will never be empty.
 	jq -r .$i $TMPF > $ETCDIR/${i}.tmp
-        mv ${i}.tmp ${i}
+        mv $ETCDIR/${i}.tmp $ETCDIR/${i}
 done
